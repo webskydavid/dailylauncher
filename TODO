@@ -1,0 +1,59 @@
+Daily Launcher
+
+Root: @high 
+  ✔ Prevent to close app by tapping on back button (Android bottom navigation) @done(20-11-08 23:11)
+  ☐ Get wallpeper to show it on launcher
+  ☐ Get list of installed applications
+  ☐ Select main screen to be shown if clicking on home button
+  ☐ Back button swape screens if not on home screen
+
+HomeScreen: @high 
+  ☐ Show timeline todos/meetings
+
+Items database:
+  ☐ 
+
+Todo List:
+  ☐ Share with others
+  ☐ 
+
+Short notes:
+  ☐ 
+
+Shopping list:
+  ☐ Add item (name/comment/price/lastBuyed/tags/priority/ifNotAvailable/shop)
+  ☐ Price sum
+  ☐ TapAndHold checkbox check/uncheck all produkts
+
+Daily notes:
+Can be used to store daily notes (diary). Can be set as todo (whole note or a part of text).
+  ☐ Screen
+    ☐ Add note
+    ☐ List note
+  ☐ Add multiple notes a day.
+    List with subnotes that create a whole note for a day. 
+  ☐ Need to store datetime/title/content/tags/isFavorite/file(foto,pdf,other?)
+  ☐ Mark as favorite
+  ☐ Add tags
+  ☐ Search notes by content/title/date
+  ☐ Sort by date/title
+  ☐ Show last note in HomeScreen
+  ☐ By adding new note it will save automaticlly
+  ☐ Emoji support
+  ☐ Count characters and notes in a day
+  ☐ Add as todo whole note or a part of text
+
+
+Achievements:
+  ☐ Todo finished task
+  ☐ Daily notes
+  ☐ Break from phone
+  ☐ Gym statistics
+
+
+
+Gym:
+  ☐ 
+
+
+
