@@ -1,8 +1,14 @@
+import 'package:dailylauncher/items.dart';
+import 'package:dailylauncher/list.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+final titleProvider = Provider<String>((_) {
+  return 'Title / Provider';
+});
 
 void main() {
-  runApp(MyApp());
+  runApp(ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -13,29 +19,12 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page 1'),
+      home: MyHomePage(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
-
-  final String title;
-
-  @override
-  _MyHomePageState createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
-
+class MyHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     //SystemChrome.setEnabledSystemUIOverlays([]);
@@ -45,28 +34,57 @@ class _MyHomePageState extends State<MyHomePage> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(widget.title),
+          title: TitleWidget(),
         ),
-        body: Center(
+        body: Container(
+          padding: EdgeInsets.all(20.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Text(
-                'You have pushed the button this many times:',
+              Row(
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      if (context.read(sortProvider).state == Sort.asc) {
+                        context.read(sortProvider).state = Sort.desc;
+                      } else {
+                        context.read(sortProvider).state = Sort.asc;
+                      }
+                    },
+                    icon: Icon(Icons.sort),
+                  ),
+                  Consumer(
+                    builder: (context, watch, child) {
+                      int count = watch(listCount);
+                      return Text('Items: $count');
+                    },
+                  ),
+                ],
               ),
-              Text(
-                '$_counter',
-                style: Theme.of(context).textTheme.headline4,
-              ),
+              ListWidget(),
             ],
           ),
         ),
         floatingActionButton: FloatingActionButton(
-          onPressed: _incrementCounter,
-          tooltip: 'Increment',
+          onPressed: () {
+            context.read(listProvider).add('Foo');
+          },
+          tooltip: 'Add',
           child: Icon(Icons.add),
         ),
       ),
     );
+  }
+}
+
+class TitleWidget extends ConsumerWidget {
+  const TitleWidget({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context, ScopedReader watch) {
+    final title = watch(titleProvider);
+    return Text(title);
   }
 }
