@@ -1,4 +1,4 @@
-import 'package:dailylauncher/items.dart';
+import 'package:dailylauncher/providers/items-provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/all.dart';
 
@@ -9,7 +9,7 @@ class ListWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, watch) {
-    final List<Item> itemList = watch(sortedList);
+    final List<Item> itemList = watch(sortedListProvider);
     watch(sortProvider);
     return Expanded(
       child: ListView.builder(

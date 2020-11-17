@@ -16,6 +16,7 @@ class Item {
 
 final sortProvider = StateProvider<Sort>((ref) {
   print(ref.container.debugProviderValues);
+
   return Sort.asc;
 });
 
@@ -27,7 +28,7 @@ final listProvider = StateNotifierProvider<ItemList>((ref) {
   ]);
 });
 
-final sortedList = Provider<List<Item>>((ref) {
+final sortedListProvider = Provider<List<Item>>((ref) {
   final sort = ref.watch(sortProvider).state;
   final list = ref.watch(listProvider.state);
   if (sort == Sort.asc) {
@@ -38,7 +39,7 @@ final sortedList = Provider<List<Item>>((ref) {
   return list;
 });
 
-final listCount = Provider<int>((ref) {
+final listCountProvider = Provider<int>((ref) {
   return ref.watch(listProvider.state).length;
 });
 
