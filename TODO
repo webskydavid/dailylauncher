@@ -1,5 +1,17 @@
 Daily Launcher
 
+POC: @high 
+  ☐ Data structure
+  ☐ Models 
+  ☐ Test data structure and models
+    Test how data are combined and test models and relations
+
+
+CI configuration:
+  ☐ Configure CI on codemagic
+  ☐ Add bumping version if new build is created
+  ☐ Add release file to github release and send it via email
+
 Root: @high 
   ✔ Prevent to close app by tapping on back button (Android bottom navigation) @done(20-11-08 23:11)
   ☐ Get wallpeper to show it on launcher
@@ -10,8 +22,6 @@ Root: @high
   ☐ Combine data. Show different data on timeline (events, todo, daily_notes)
     ☐ Create config
     ☐ Submenu to check which data to show
-
-
 
 Sidedrawer status bar (like menu but for statistics):
 
@@ -76,7 +86,7 @@ Todo List:
   ☐ Presets as a list of already added data 
   ☐ Share list
 
-  
+
 Short notes:
 
 Grocery list:
