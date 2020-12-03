@@ -24,29 +24,47 @@ class HomeScreen extends StatelessWidget {
                 children: [
                   IconButton(
                     onPressed: () {
-                      if (context.read(sortProvider).state == Sort.asc) {
-                        context.read(sortProvider).state = Sort.desc;
+                      if (context.read(listSort).state == Sort.asc) {
+                        context.read(listSort).state = Sort.desc;
                       } else {
-                        context.read(sortProvider).state = Sort.asc;
+                        context.read(listSort).state = Sort.asc;
                       }
                     },
                     icon: Icon(Icons.sort),
                   ),
                   Consumer(
                     builder: (context, watch, child) {
-                      int count = watch(listCountProvider);
+                      int count = watch(listCount);
                       return Text('Items: $count');
                     },
                   ),
+                  SizedBox(
+                    width: 10.0,
+                  ),
+                  Expanded(
+                    child: TextField(
+                      onChanged: (value) {
+                        print(0);
+                        context.read(listFilter).state = value;
+                      },
+                    ),
+                  ),
                 ],
               ),
-              ListWidget(),
+              Consumer(builder: (context, watch, child) {
+                final box = watch(boxProvider);
+                return box.when(
+                  data: (data) => ListWidget(),
+                  loading: () => CircularProgressIndicator(),
+                  error: (e, t) => Text(e.toString()),
+                );
+              }),
             ],
           ),
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
-            context.read(listProvider).add('Foo');
+            context.read(listStateNotifierProvider).add();
           },
           tooltip: 'Add',
           child: Icon(Icons.add),

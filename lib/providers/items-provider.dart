@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/all.dart';
+import 'package:hive/hive.dart';
 
 enum Sort { asc, desc }
 
@@ -14,61 +15,69 @@ class Item {
   }
 }
 
-final sortProvider = StateProvider<Sort>((ref) {
-  print(ref.container.debugProviderValues);
+final listFilter = StateProvider<String>((_) => '');
+final listSort = StateProvider((_) => Sort.asc);
 
-  return Sort.asc;
+final boxProvider = FutureProvider.autoDispose((ref) async {
+  await Future.delayed(Duration(milliseconds: 1000));
+  return await Hive.openBox('item');
 });
 
-final listProvider = StateNotifierProvider<ItemList>((ref) {
-  return ItemList([
-    Item(id: '1', name: 'Test 1'),
-    Item(id: '2', name: 'Test 2'),
-    Item(id: '3', name: 'Test 3'),
-  ]);
+final listStateNotifierProvider = StateNotifierProvider.autoDispose((ref) {
+  return ref.watch(boxProvider).when(
+        data: (data) {
+          print('when().data');
+          ItemList itemList = ItemList(data)..getAll();
+          return itemList;
+        },
+        loading: () => ItemList(null),
+        error: (e, t) => ItemList(null),
+      );
 });
 
-final sortedListProvider = Provider<List<Item>>((ref) {
-  final sort = ref.watch(sortProvider).state;
-  final list = ref.watch(listProvider.state);
-  if (sort == Sort.asc) {
-    list.sort((a, b) => a.name.compareTo(b.name));
-  } else if (sort == Sort.desc) {
-    list.sort((a, b) => b.name.compareTo(a.name));
-  }
-  return list;
-});
+final sortedProvider = Provider.autoDispose((ref) {
+  List list = ref.watch(listStateNotifierProvider.state);
+  Sort sort = ref.watch(listSort).state;
+  String filter = ref.watch(listFilter).state;
 
-final listCountProvider = Provider<int>((ref) {
-  return ref.watch(listProvider.state).length;
-});
-
-class ItemList extends StateNotifier<List<Item>> {
-  ItemList([List<Item> initList]) : super(initList ?? []);
-
-  void add(String name) async {
-    await Future.delayed(Duration(milliseconds: 1000));
-    state = [
-      ...state,
-      Item(
-        id: DateTime.now().millisecondsSinceEpoch.toString().substring(8),
-        name: name,
-      )
-    ];
+  if (sort == Sort.desc) {
+    list.sort((a, b) => a['name'].compareTo(b['name']));
+  } else {
+    list.sort((a, b) => b['name'].compareTo(a['name']));
   }
 
-  void remove(Item item) async {
-    await Future.delayed(Duration(milliseconds: 500));
-    state = state.where((element) => element.id != item.id).toList();
+  return list.where((element) => element['name'].contains(filter)).toList();
+});
+
+final listCount = Provider.autoDispose<int>((ref) {
+  List list = ref.watch(listStateNotifierProvider.state);
+  return list.length;
+});
+
+class ItemList extends StateNotifier<List<dynamic>> {
+  Box box;
+  ItemList(this.box) : super([]);
+
+  void remove(item) async {
+    await box.delete(item['id']);
+    getAll();
   }
 
-  void edit(Item item) async {
-    await Future.delayed(Duration(milliseconds: 500));
-    state = state.map((element) {
-      if (element.id == item.id) {
-        return Item(id: item.id, name: '+ ${item.name}');
-      }
-      return element;
-    }).toList();
+  void edit(item) async {
+    await box.put(item['id'], {
+      'id': item['id'],
+      'name': 'Bla bla ${DateTime.now().millisecond.toString()}'
+    });
+    getAll();
+  }
+
+  getAll() {
+    state = box.values.toList();
+  }
+
+  void add() async {
+    String id = DateTime.now().millisecond.toString();
+    await box.put(id, {'id': id, 'name': 'Name $id'});
+    getAll();
   }
 }
