@@ -1,32 +1,132 @@
 Daily Launcher
 
+POC: @high 
+  ☐ Data structure
+  ☐ Models 
+  ☐ Test data structure and models
+    Test how data are combined and test models and relations
+
+
+CI configuration:
+  ☐ Configure CI on codemagic
+  ☐ Add bumping version if new build is created
+  ☐ Add release file to github release and send it via email
+
 Root: @high 
   ✔ Prevent to close app by tapping on back button (Android bottom navigation) @done(20-11-08 23:11)
   ☐ Get wallpeper to show it on launcher
   ☐ Get list of installed applications
   ☐ Select main screen to be shown if clicking on home button
   ☐ Back button swape screens if not on home screen
+  
+  ☐ Combine data. Show different data on timeline (events, todo, daily_notes)
+    ☐ Create config
+    ☐ Submenu to check which data to show
+
+Sidedrawer status bar (like menu but for statistics):
 
 HomeScreen: @high 
-  ☐ Show timeline todos/meetings
+  ☐ Show timeline todos/meetings/
 
 Items database:
-  ☐ 
+  Model [Item]
+    id | String
+    name | String
+    note | String
+    created | DateTime
+    updated | DateTime
+    amount | int
+    tags | int[]
+    creator | String (userId)
+    shared | String[] (userId)
+    favorite | boolean
+    files | File[]
+    location | String ('home', 'basement' ...)
+  ☐ Presets as a list of already added data
+  ☐ Take foto and scan with ML to add items
+
+Quick timeline [EVENTS]:
+  Model [Event]
+    id | String
+    done | boolean
+    name | String
+    note | String
+    priority | int (0-9)
+    created | DateTime
+    updated | DateTime
+    start | DateTime
+    end | DateTime
+    tags | int[]
+    creator | String (userId)
+    shared | String[] (userId)
+    favorite | boolean
+    recurring | Event[]
+    files | File[]
+  ☐ Presets
+  ☐ Showing all events/todos at one place
+  ☐ Filtering by the type of event
 
 Todo List:
-  ☐ Share with others
-  ☐ 
+  Model [Todo]
+    id | String
+    done | boolean
+    name | String
+    note | String
+    priority | int (0-9)
+    created | DateTime
+    updated | DateTime
+    start | DateTime
+    end | DateTime
+    tags | int[]
+    creator | String (userId)
+    shared | String[] (userId)
+    favorite | boolean
+    recurring | Event[]
+    files | File[]
+  ☐ Presets as a list of already added data 
+  ☐ Share list
+
 
 Short notes:
-  ☐ 
 
-Shopping list:
+Grocery list:
+  Model [Item]
+    id | String
+    done | boolean
+    name | String
+    note | String
+    price | double
+    priority | int (0-9)
+    created | DateTime
+    updated | DateTime
+    buyed | DateTime
+    amount | int
+    notAvailable | boolean
+    tags | int[]
+    shop | String[]
+    creator | String (userId)
+    shared | String[] (userId)
+    favorite | boolean
+    files | File[]
+  ☐ Presets as a list of already added data
   ☐ Add item (name/comment/price/lastBuyed/tags/priority/ifNotAvailable/shop)
   ☐ Price sum
-  ☐ TapAndHold checkbox check/uncheck all produkts
+  ☐ TapAndHold checkbox check/uncheck all products
+  ☐ Share list
+  ☐ Scan prices ML from receipt
 
 Daily notes:
-Can be used to store daily notes (diary). Can be set as todo (whole note or a part of text).
+  Model [Note]
+    id | String
+    name | String
+    note | String
+    created | DateTime
+    updated | DateTime
+    tags | int[]
+    creator | String (userId)
+    favorite | boolean
+    files | File[]
+  Can be used to store daily notes (diary). Can be set as todo (whole note or a part of text).
   ☐ Screen
     ☐ Add note
     ☐ List note

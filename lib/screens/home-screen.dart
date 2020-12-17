@@ -1,9 +1,11 @@
 import 'package:dailylauncher/providers/items-provider.dart';
+import 'package:dailylauncher/widgets/form.dart';
 import 'package:dailylauncher/widgets/list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/all.dart';
 
 class HomeScreen extends StatelessWidget {
+  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   @override
   Widget build(BuildContext context) {
     //SystemChrome.setEnabledSystemUIOverlays([]);
@@ -12,6 +14,7 @@ class HomeScreen extends StatelessWidget {
         return false;
       },
       child: Scaffold(
+        key: scaffoldKey,
         appBar: AppBar(
           title: TitleWidget(),
         ),
@@ -20,6 +23,13 @@ class HomeScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
+              TextField(
+                decoration: InputDecoration(labelText: 'Search by name'),
+                onChanged: (value) {
+                  print(0);
+                  context.read(listFilter).state = value;
+                },
+              ),
               Row(
                 children: [
                   IconButton(
@@ -41,14 +51,6 @@ class HomeScreen extends StatelessWidget {
                   SizedBox(
                     width: 10.0,
                   ),
-                  Expanded(
-                    child: TextField(
-                      onChanged: (value) {
-                        print(0);
-                        context.read(listFilter).state = value;
-                      },
-                    ),
-                  ),
                 ],
               ),
               Consumer(builder: (context, watch, child) {
@@ -59,17 +61,50 @@ class HomeScreen extends StatelessWidget {
                   error: (e, t) => Text(e.toString()),
                 );
               }),
+              Consumer(
+                builder: (context, watch, child) {
+                  int sum = watch(priceSum);
+                  return Text(
+                    'Items: $sum zł',
+                    style: TextStyle(fontSize: 20.0),
+                  );
+                },
+              ),
             ],
           ),
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            context.read(listStateNotifierProvider).add();
-          },
-          tooltip: 'Add',
-          child: Icon(Icons.add),
-        ),
+        floatingActionButton: Consumer(builder: (context, watch, child) {
+          final show = watch(showFloatingButtonProvider).state;
+          return show ? FloatingButton() : Container();
+        }),
       ),
+    );
+  }
+}
+
+class FloatingButton extends StatelessWidget {
+  const FloatingButton({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return FloatingActionButton(
+      onPressed: () {
+        showBottomSheet(
+          elevation: 16,
+          context: context,
+          builder: (_) {
+            return Wrap(children: [
+              FormWidget(item: {'name': '', 'price': ''})
+            ]);
+          },
+        );
+
+        context.read(showFloatingButtonProvider).state = false;
+      },
+      tooltip: 'Add',
+      child: Icon(Icons.add),
     );
   }
 }

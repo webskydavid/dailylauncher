@@ -1,7 +1,7 @@
 import 'package:dailylauncher/providers/items-provider.dart';
+import 'package:dailylauncher/widgets/form.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/all.dart';
-import 'package:hive/hive.dart';
 
 class ListWidget extends ConsumerWidget {
   const ListWidget({
@@ -12,11 +12,18 @@ class ListWidget extends ConsumerWidget {
   Widget build(BuildContext context, watch) {
     var list = watch(sortedProvider);
     watch(listSort);
-
+    bool isDivider = false;
     return Expanded(
       child: ListView.builder(
         itemCount: list.length,
         itemBuilder: (context, index) {
+          if (list[index]['done'] && !isDivider) {
+            isDivider = true;
+            return Column(
+              children: [Divider(), ItemWidget(item: list[index])],
+            );
+          }
+
           return ItemWidget(item: list[index]);
         },
       ),
@@ -38,14 +45,38 @@ class ItemWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Row(
-          children: [
-            Text(item['id']),
-            SizedBox(
-              width: 10,
-            ),
-            Text(item['name']),
-          ],
+        Checkbox(
+          value: item['done'] ?? false,
+          onChanged: (value) {
+            context.read(listStateNotifierProvider).toggle(item['id']);
+          },
+        ),
+        Flexible(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(item['id']),
+              SizedBox(
+                width: 10,
+              ),
+              Flexible(
+                child: Text(
+                  item['name'],
+                  softWrap: true,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 2,
+                ),
+              ),
+              SizedBox(
+                width: 5.0,
+              ),
+              Text(
+                '${(item['price'] ?? '0')} zł',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
         ),
         Row(
           children: [
@@ -56,8 +87,25 @@ class ItemWidget extends StatelessWidget {
               icon: Icon(Icons.delete),
             ),
             IconButton(
-              onPressed: () =>
-                  context.read(listStateNotifierProvider).edit(item),
+              onPressed: () {
+                showBottomSheet(
+                  elevation: 16,
+                  context: context,
+                  builder: (_) {
+                    return Wrap(children: [
+                      FormWidget(
+                        item: {
+                          'id': item['id'],
+                          'name': item['name'],
+                          'done': item['done'],
+                          'price': item['price']
+                        },
+                      )
+                    ]);
+                  },
+                );
+                context.read(showFloatingButtonProvider).state = false;
+              },
               color: Colors.blue[300],
               icon: Icon(Icons.edit),
             ),
