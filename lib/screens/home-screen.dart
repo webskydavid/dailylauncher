@@ -13,70 +13,80 @@ class HomeScreen extends StatelessWidget {
       onWillPop: () async {
         return false;
       },
-      child: Scaffold(
-        key: scaffoldKey,
-        appBar: AppBar(
-          title: TitleWidget(),
-        ),
-        body: Container(
-          padding: EdgeInsets.all(20.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              TextField(
-                decoration: InputDecoration(labelText: 'Search by name'),
-                onChanged: (value) {
-                  print(0);
-                  context.read(listFilter).state = value;
-                },
-              ),
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: () {
-                      if (context.read(listSort).state == Sort.asc) {
-                        context.read(listSort).state = Sort.desc;
-                      } else {
-                        context.read(listSort).state = Sort.asc;
-                      }
-                    },
-                    icon: Icon(Icons.sort),
-                  ),
-                  Consumer(
-                    builder: (context, watch, child) {
-                      int count = watch(listCount);
-                      return Text('Items: $count');
-                    },
-                  ),
-                  SizedBox(
-                    width: 10.0,
-                  ),
-                ],
-              ),
-              Consumer(builder: (context, watch, child) {
-                final box = watch(boxProvider);
-                return box.when(
-                  data: (data) => ListWidget(),
-                  loading: () => CircularProgressIndicator(),
-                  error: (e, t) => Text(e.toString()),
-                );
-              }),
-              Consumer(
-                builder: (context, watch, child) {
-                  int sum = watch(priceSum);
-                  return Text(
-                    'Items: $sum zł',
-                    style: TextStyle(fontSize: 20.0),
-                  );
-                },
-              ),
-            ],
+      child: GestureDetector(
+        onTap: () {
+          FocusScope.of(context).unfocus();
+          context.read(activeItemInputProvider).state = '';
+        },
+        child: Scaffold(
+          key: scaffoldKey,
+          appBar: AppBar(
+            title: TitleWidget(),
           ),
+          body: Container(
+            padding: EdgeInsets.all(20.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Row(
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        if (context.read(listSort).state == Sort.asc) {
+                          context.read(listSort).state = Sort.desc;
+                        } else {
+                          context.read(listSort).state = Sort.asc;
+                        }
+                      },
+                      icon: Icon(Icons.sort),
+                    ),
+                    Flexible(
+                      child: TextField(
+                        decoration:
+                            InputDecoration(labelText: 'Search by name'),
+                        onChanged: (value) {
+                          print(0);
+                          context.read(listFilter).state = value;
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: 30.0,
+                ),
+                ListWidget(),
+                Consumer(
+                  builder: (context, watch, child) {
+                    AsyncValue<Map<String, int>> count = watch(listCount);
+                    return count.when(
+                      data: (value) {
+                        print(value);
+                        return Text(
+                            'Items ${value['undone']} / ${value['done']}');
+                      },
+                      loading: () => Container(),
+                      error: (e, t) => Text(e.toString()),
+                    );
+                  },
+                ),
+                Consumer(
+                  builder: (context, watch, child) {
+                    double sum = watch(priceSum);
+                    return Text(
+                      'Sum: $sum zł',
+                      style: TextStyle(fontSize: 20.0),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+          floatingActionButton: Consumer(builder: (context, watch, child) {
+            final show = watch(showFloatingButtonProvider).state;
+            return show ? FloatingButton() : Container();
+          }),
         ),
-        floatingActionButton: Consumer(builder: (context, watch, child) {
-          final show = watch(showFloatingButtonProvider).state;
-          return show ? FloatingButton() : Container();
-        }),
       ),
     );
   }
@@ -95,9 +105,7 @@ class FloatingButton extends StatelessWidget {
           elevation: 16,
           context: context,
           builder: (_) {
-            return Wrap(children: [
-              FormWidget(item: {'name': '', 'price': ''})
-            ]);
+            return Wrap(children: [FormWidget(item: Item())]);
           },
         );
 

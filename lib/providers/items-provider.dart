@@ -4,25 +4,68 @@ import 'package:hive/hive.dart';
 enum Sort { asc, desc }
 
 class Item {
-  Item({
-    id,
-    name,
-    done,
-    created,
-    updated,
-  })  : done = done ?? false,
-        created = created ?? DateTime.now(),
-        updated = updated ?? DateTime.now();
-
   String id;
   String name;
+  double price;
   bool done;
   DateTime created;
   DateTime updated;
+  int amount;
+  List<int> tags;
+  String shop;
+
+  Item({
+    this.id,
+    this.name,
+    this.price,
+    this.done,
+    this.created,
+    this.updated,
+    this.amount,
+    this.tags,
+    this.shop,
+  }) {
+    this.id = id ?? '';
+    this.name = name ?? '';
+    this.price = price ?? 0.0;
+    this.done = done ?? false;
+    this.created = created ?? DateTime.now();
+    this.updated = updated ?? DateTime.now();
+    this.amount = amount ?? 1;
+    this.tags = tags ?? [];
+    this.shop = shop ?? '';
+  }
+
+  Item.fromMap(Map<dynamic, dynamic> map) {
+    print(map['created']);
+    id = map['id'];
+    name = map['name'];
+    price = double.parse(map['price'] ?? '0.0');
+    done = map['done'];
+    created = DateTime.parse(map['created']);
+    updated = DateTime.parse(map['updated']);
+    amount = map['amount'];
+    tags = map['tags'];
+    shop = map['shop'];
+  }
+
+  Map<String, dynamic> toMap() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
+    data['name'] = this.name;
+    data['price'] = this.price.toString();
+    data['done'] = this.done;
+    data['created'] = this.created.toString();
+    data['updated'] = this.updated.toString();
+    data['amount'] = this.amount;
+    data['tags'] = this.tags;
+    data['shop'] = this.shop;
+    return data;
+  }
 
   @override
   String toString() {
-    return '$id - $name';
+    return this.toMap().toString();
   }
 }
 
@@ -33,110 +76,123 @@ final listFilter = StateProvider<String>((ref) {
 
 final listSort = StateProvider((_) => Sort.asc);
 
-final boxProvider = FutureProvider.autoDispose((ref) async {
-  await Future.delayed(Duration(milliseconds: 1000));
-  //Hive.deleteBoxFromDisk('item');
-  return await Hive.openBox('item');
+final listStateNotifierProvider = StateNotifierProvider<ItemList>((ref) {
+  return ItemList();
 });
 
-final listStateNotifierProvider = StateNotifierProvider.autoDispose((ref) {
-  return ref.watch(boxProvider).when(
-        data: (data) {
-          ItemList itemList = ItemList(data)..getAll();
-          return itemList;
-        },
-        loading: () => ItemList(null),
-        error: (e, t) => ItemList(null),
-      );
-});
-
-final sortedProvider = Provider.autoDispose((ref) {
-  List list = ref.watch(listStateNotifierProvider.state);
+final sortedProvider = Provider<AsyncValue<List<Item>>>((ref) {
+  final AsyncValue<List<Item>> list =
+      ref.watch(listStateNotifierProvider.state);
   Sort sort = ref.watch(listSort).state;
   String filter = ref.watch(listFilter).state;
 
-  List done = list.where((element) => element['done']).toList();
-  List undone = list.where((element) => !element['done']).toList();
+  AsyncValue<List<Item>> result = list.whenData(
+    (value) {
+      var done = value.where((element) => element.done).toList();
+      var undone = value.where((element) => !element.done).toList();
 
-  if (sort == Sort.desc) {
-    done.sort((a, b) => a['name'].compareTo(b['name']));
-    undone.sort((a, b) => a['name'].compareTo(b['name']));
-  } else {
-    done.sort((a, b) => b['name'].compareTo(a['name']));
-    undone.sort((a, b) => b['name'].compareTo(a['name']));
-  }
+      if (sort == Sort.desc) {
+        done.sort((a, b) => a.name.compareTo(b.name));
+        undone.sort((a, b) => a.name.compareTo(b.name));
+      } else {
+        done.sort((a, b) => b.name.compareTo(a.name));
+        undone.sort((a, b) => b.name.compareTo(a.name));
+      }
 
-  List mergedList = [...undone, ...done];
+      return [...undone, ...done];
+    },
+  );
 
-  return mergedList
-      .where((element) => element['name'].contains(filter))
-      .toList();
+  return result.whenData((value) => value
+      .where((element) =>
+          element.name.toLowerCase().contains(filter.toLowerCase()))
+      .toList());
 });
 
-final listCount = Provider.autoDispose<int>((ref) {
-  List list = ref.watch(listStateNotifierProvider.state);
-  return list.length;
+final listCount = Provider<AsyncValue<Map<String, int>>>((ref) {
+  AsyncValue<List<Item>> list = ref.watch(listStateNotifierProvider.state);
+  return list.whenData((value) => ({
+        'done': value.where((element) => element.done).length ?? 0,
+        'undone': value.where((element) => !element.done).length ?? 0,
+      }));
 });
 
-final priceSum = Provider.autoDispose<int>((ref) {
-  int sum = 0;
-  List list = ref.watch(listStateNotifierProvider.state);
-  list.forEach((value) {
-    sum = sum + int.parse(value['price']);
-  });
+final priceSum = Provider.autoDispose<double>((ref) {
+  double sum = 0.0;
+  AsyncValue<List<Item>> list = ref.watch(listStateNotifierProvider.state);
+  list.whenData((value) => value.forEach((value) {
+        print(value.price);
+        sum = sum + value.price;
+      }));
   return sum;
 });
 
-class ItemList extends StateNotifier<List<dynamic>> {
+class ItemList extends StateNotifier<AsyncValue<List<Item>>> {
   Box box;
-  ItemList(this.box) : super([]);
+  ItemList([AsyncValue<List<Item>> items])
+      : super(items ?? AsyncValue.loading()) {
+    _init();
+  }
 
-  void remove(item) async {
-    await box.delete(item['id']);
+  _init() async {
+    print('init()');
+    box = await Hive.openBox('item');
+    //Hive.deleteBoxFromDisk('item');
     getAll();
   }
 
-  void edit(item) async {
-    await box.put(item['id'], {
-      'id': item['id'],
-      'name': item['name'],
-      'done': item['done'],
-      'price': item['price'],
-    });
+  Future<void> getAll() async {
+    try {
+      print('getAll()');
+      await Future.delayed(Duration(milliseconds: 200));
+      state = AsyncValue.data(
+        box.values.map((item) {
+          print(item);
+          return Item.fromMap(item);
+        }).toList(),
+      );
+    } catch (e, t) {
+      state = AsyncValue.error('getAll() $e, $t', t);
+    }
+  }
+
+  void remove(Item item) async {
+    state = AsyncValue.loading();
+    await box.delete(item.id);
+    getAll();
+  }
+
+  void edit(Item item) async {
+    state = AsyncValue.loading();
+    await box.put(item.id, item.toMap());
     print('Edit() $item');
     getAll();
   }
 
-  getAll() {
-    state = box.values.toList();
-    print(state);
-  }
-
-  void add(item) async {
+  void add(Item item) async {
+    state = AsyncValue.loading();
     int id = DateTime.now().millisecond;
     String idStr = id.toString();
-
-    await box.put(idStr, {
-      'id': idStr,
-      'name': item['name'],
-      'done': false,
-      'price': item['price']
-    });
+    item.id = idStr;
+    print('add() $item');
+    await box.put(idStr, item.toMap());
     getAll();
   }
 
   void toggle(String id) async {
-    var item = box.get(id);
-    await box.put(id, {
-      'id': item['id'],
-      'name': item['name'],
-      'done': !item['done'],
-      'price': item['price'],
-    });
+    state = AsyncValue.loading();
+    var item = Item.fromMap(box.get(id));
+    item.done = !item.done;
+    item.updated = DateTime.now();
+    await box.put(id, item.toMap());
     getAll();
   }
 }
 
 final showFloatingButtonProvider = StateProvider<bool>((ref) {
   return true;
+});
+
+final activeItemInputProvider = StateProvider<String>((ref) {
+  return '';
 });

@@ -1,12 +1,11 @@
 import 'package:dailylauncher/providers/items-provider.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/all.dart';
 
 class FormWidget extends StatefulWidget {
   FormWidget({Key key, this.item}) : super(key: key);
 
-  final Map<String, dynamic> item;
+  final Item item;
 
   @override
   _FormWidgetState createState() => _FormWidgetState();
@@ -17,16 +16,23 @@ class _FormWidgetState extends State<FormWidget> {
   final _formKey = GlobalKey<FormState>();
   String name;
   String price;
+  String amount;
+  String shop;
+  String tags;
 
   @override
   void initState() {
     super.initState();
-    this.name = widget.item['name'];
-    this.price = widget.item['price'];
+    this.name = widget.item.name;
+    this.price = widget.item.price.toString();
+    this.amount = widget.item.price.toString();
+    this.shop = widget.item.shop;
+    this.tags = widget.item.tags.join(',');
   }
 
   @override
   Widget build(BuildContext context) {
+    print(widget.item);
     return Container(
       padding: EdgeInsets.all(16.0),
       child: Form(
@@ -34,7 +40,7 @@ class _FormWidgetState extends State<FormWidget> {
         child: Column(
           //mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            widget.item.containsKey('id')
+            widget.item.id != ''
                 ? Text(
                     'Editing',
                     overflow: TextOverflow.ellipsis,
@@ -44,37 +50,108 @@ class _FormWidgetState extends State<FormWidget> {
                     ),
                   )
                 : Text('Create new item:'),
-            TextFormField(
-              initialValue: widget.item['name'],
-              decoration: InputDecoration(labelText: 'Name'),
-              validator: (value) {
-                if (value == '') {
-                  return 'Empty value';
-                }
-                return null;
-              },
-              onChanged: (value) {
-                this.name = value;
-              },
-              autofocus: true,
+            Row(
+              children: [
+                Flexible(
+                  child: TextFormField(
+                    initialValue: widget.item.name,
+                    decoration: InputDecoration(labelText: 'Name'),
+                    validator: (value) {
+                      if (value == '') {
+                        return 'Empty value';
+                      }
+                      return null;
+                    },
+                    onChanged: (value) {
+                      this.name = value;
+                    },
+                    autofocus: true,
+                  ),
+                ),
+                SizedBox(
+                  width: 12.0,
+                ),
+                Flexible(
+                  child: TextFormField(
+                    initialValue: widget.item.shop,
+                    decoration: InputDecoration(labelText: 'Shop'),
+                    validator: (value) {
+                      if (value == '') {
+                        return 'Empty value';
+                      }
+                      return null;
+                    },
+                    onChanged: (value) {
+                      this.shop = value;
+                    },
+                    autofocus: true,
+                  ),
+                ),
+                SizedBox(
+                  width: 12.0,
+                ),
+                Flexible(
+                  child: TextFormField(
+                    initialValue: widget.item.tags.join(','),
+                    decoration: InputDecoration(labelText: 'Tags'),
+                    validator: (value) {
+                      if (value == '') {
+                        return 'Empty value';
+                      }
+                      return null;
+                    },
+                    onChanged: (value) {
+                      this.tags = value;
+                    },
+                    autofocus: true,
+                  ),
+                )
+              ],
             ),
-            TextFormField(
-              initialValue: widget.item['price'],
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              decoration: InputDecoration(labelText: 'Price'),
-              validator: (value) {
-                if (value == '') {
-                  return 'Empty value';
-                }
-                double number = double.tryParse(value);
-                if (number == null) {
-                  return 'No digits';
-                }
-                return null;
-              },
-              onChanged: (value) {
-                this.price = value;
-              },
+            Row(
+              children: [
+                Flexible(
+                  child: TextFormField(
+                    initialValue: widget.item.price.toString(),
+                    decoration: InputDecoration(labelText: 'Price'),
+                    validator: (value) {
+                      if (value == '') {
+                        return 'Empty value';
+                      }
+                      double number = double.tryParse(value);
+                      if (number == null) {
+                        return 'No digits';
+                      }
+                      return null;
+                    },
+                    onChanged: (value) {
+                      this.price = value;
+                    },
+                  ),
+                ),
+                SizedBox(
+                  width: 12.0,
+                ),
+                Flexible(
+                  child: TextFormField(
+                    initialValue: widget.item.amount.toString(),
+                    decoration: InputDecoration(labelText: 'Amount'),
+                    validator: (value) {
+                      if (value == '') {
+                        return 'Empty value';
+                      }
+                      int number = int.tryParse(value);
+                      if (number == null) {
+                        return 'No digits';
+                      }
+                      return null;
+                    },
+                    onChanged: (value) {
+                      this.amount = value;
+                    },
+                  ),
+                ),
+              ],
             ),
             SizedBox(
               height: 20.0,
@@ -86,25 +163,37 @@ class _FormWidgetState extends State<FormWidget> {
                     onPressed: () {
                       if (_formKey.currentState.validate()) {
                         _.read(showFloatingButtonProvider).state = true;
-                        if (widget.item.containsKey('id')) {
-                          _.read(listStateNotifierProvider).edit({
-                            'id': widget.item['id'],
-                            'name': name,
-                            'done': widget.item['done'],
-                            'price': price
-                          });
+                        print('item ${widget.item}');
+                        if (widget.item.id != '') {
+                          _.read(listStateNotifierProvider).edit(Item(
+                                id: widget.item.id,
+                                name: name,
+                                done: widget.item.done,
+                                price: double.parse(price),
+                                shop: shop,
+                                tags: tags
+                                    .split(',')
+                                    .map((tag) => int.parse(tag))
+                                    .toList(),
+                              ));
                         } else {
                           _.read(listStateNotifierProvider).add(
-                            {'name': name, 'price': price},
-                          );
+                                Item(
+                                  name: name,
+                                  price: double.parse(price),
+                                  amount: int.parse(amount),
+                                  shop: shop,
+                                  tags: tags
+                                      .split(',')
+                                      .map((tag) => int.parse(tag))
+                                      .toList(),
+                                ),
+                              );
                         }
-                        print(widget.item.containsKey('id'));
                         Navigator.pop(context);
                       }
                     },
-                    child: widget.item.containsKey('id')
-                        ? Text('Save')
-                        : Text('Create'),
+                    child: widget.item.id != '' ? Text('Save') : Text('Create'),
                   ),
                   SizedBox(height: 10.0),
                   RaisedButton(
