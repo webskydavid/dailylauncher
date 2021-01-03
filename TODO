@@ -1,9 +1,11 @@
 Daily Launcher
 
-POC: @high 
+POC 0.0.1: @high   
+  ☐ Mainscreen for current day (events @high, alarms @low, todo @low, grocery @low )
   ☐ Data structure
   ☐ Models 
   ☐ Test data structure and models
+  ☐ Test widgets
     Test how data are combined and test models and relations
 
 
