@@ -1,7 +1,7 @@
 Daily Launcher
 
 POC 0.0.1: @high   
-  ☐ Mainscreen for current day (events @high, alarms @low, todo @low, grocery @low )
+  ☐ Mainscreen for current day (events @low, alarms @low, todo @low, grocery @high )
   ☐ Data structure
   ☐ Models 
   ☐ Test data structure and models
