@@ -1,4 +1,3 @@
-import 'package:dailylauncher/screens/screens.dart';
 import 'package:flutter/material.dart';
 
 class Keys {
@@ -11,7 +10,14 @@ class MainScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: Text('MainScreen'),
+      child: ListView(
+        children: [
+          Text('1'),
+          Text('1'),
+          Text('1'),
+          Text('1'),
+        ],
+      ),
     );
   }
 }

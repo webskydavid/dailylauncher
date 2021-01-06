@@ -1,7 +1,12 @@
 Daily Launcher
 
 POC 0.0.1: @high   
-  ☐ Mainscreen for current day (events @low, alarms @low, todo @low, grocery @high )
+  ☐ Mainscreen for current day 
+  ☐ Grocery list
+  ☐ Add new grocery product (box: grocery)
+  ☐ Ability to save grocery products inside of product list (box: product)
+    If current product has additional params (kcal, proteins, etc...) then add to products box
+  ☐ Recipes list
   ☐ Data structure
   ☐ Models 
   ☐ Test data structure and models
