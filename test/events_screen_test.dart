@@ -13,15 +13,15 @@ void main() {
 
   setUpAll(() {
     rootWidget = MaterialApp(
-      home: MainScreen(),
+      home: EventsScreen(),
     );
   });
 
-  group('MainScreenWidget', () {
+  group('EventsScreenWidget', () {
     testWidgets('should have "MainScreen" widget in the tree',
         (WidgetTester tester) async {
       await tester.pumpWidget(rootWidget);
-      expect(find.byType(MainScreen), findsOneWidget);
+      expect(find.byType(EventsScreen), findsOneWidget);
     });
 
     // group('and user drag right', () {

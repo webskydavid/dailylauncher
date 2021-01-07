@@ -11,7 +11,7 @@ void main() {
     );
   });
 
-  group('ShoppingListScreen', () {
+  group('GroceryListScreen', () {
     testWidgets('should show ShoppingListScreen', (WidgetTester tester) async {
       await tester.pumpWidget(rootWidget);
     });

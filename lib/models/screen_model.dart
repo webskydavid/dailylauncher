@@ -5,11 +5,8 @@ class ScreenModel {
   final Icon icon;
   final Icon appBarIcon;
   final Widget floatingActionWidget;
+  final Widget screenWidget;
 
-  ScreenModel(
-    this.title,
-    this.icon,
-    this.appBarIcon,
-    this.floatingActionWidget,
-  );
+  ScreenModel(this.title, this.icon, this.appBarIcon, this.floatingActionWidget,
+      this.screenWidget);
 }

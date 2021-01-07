@@ -8,13 +8,15 @@ List<ScreenModel> screens = [
     'Today',
     Icon(Icons.event),
     Icon(Icons.calendar_today),
-    Container(),
+    CircularProgressIndicator(),
+    EventsScreen(),
   ),
   ScreenModel(
     'Grocery',
     Icon(Icons.shopping_cart),
     Icon(Icons.menu),
     AddGroceryScreen(),
+    GroceryScreen(),
   ),
 ];
 
@@ -31,14 +33,15 @@ class _RootWidgetState extends State<RootWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: _appBar(),
-      body: currentTabIndex == 0 ? MainScreen() : GroceryScreen(),
+      body: allScreens[currentTabIndex].screenWidget,
       floatingActionButton: _floatingActionButton(),
-      bottomNavigationBar: _bottomNavigationBar(context),
+      bottomNavigationBar: _bottomNavigationBar(),
     );
   }
 
   AppBar _appBar() {
     return AppBar(
+      leading: BackButton(),
       title: Text(allScreens[currentTabIndex].title),
       actions: [
         IconButton(
@@ -55,14 +58,24 @@ class _RootWidgetState extends State<RootWidget> {
       onPressed: () {
         Navigator.of(context).push(MaterialPageRoute(
           builder: (context) {
-            return AddGroceryScreen();
+            if (currentTabIndex == 1) {
+              return AddGroceryScreen();
+            } else {
+              return Scaffold(
+                body: Center(
+                  child: Column(
+                    children: [Text('Add event'), BackButton()],
+                  ),
+                ),
+              );
+            }
           },
         ));
       },
     );
   }
 
-  BottomNavigationBar _bottomNavigationBar(BuildContext context) {
+  BottomNavigationBar _bottomNavigationBar() {
     return BottomNavigationBar(
       currentIndex: currentTabIndex,
       onTap: (int tabIndex) {

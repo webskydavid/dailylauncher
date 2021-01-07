@@ -5,6 +5,12 @@ class AddGroceryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text('Add grocery');
+    return Scaffold(
+      body: Center(
+        child: Column(
+          children: [Text('Add Grocery'), BackButton()],
+        ),
+      ),
+    );
   }
 }

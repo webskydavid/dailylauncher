@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:dailylauncher/screens/screens.dart';
 import 'package:dailylauncher/widgets/widgets.dart';
 
@@ -7,24 +5,31 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  Widget rootWidget;
-
-  setUpAll(() {
-    rootWidget = MaterialApp(
+  Future<void> _buildWidget(WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
       home: RootWidget(),
-    );
-  });
+    ));
+  }
 
   group('RootWidget', () {
+    testWidgets('should have specific number of icons',
+        (WidgetTester tester) async {
+      await _buildWidget(tester);
+      expect(
+          find.descendant(
+              of: find.byType(BottomNavigationBar),
+              matching: find.byType(Icon)),
+          findsNWidgets(2));
+    });
     testWidgets('should show MainScreen', (WidgetTester tester) async {
-      await tester.pumpWidget(rootWidget);
+      await _buildWidget(tester);
       expect(find.byType(Scaffold), findsOneWidget);
-      expect(find.byType(MainScreen), findsOneWidget);
+      expect(find.byType(EventsScreen), findsOneWidget);
     });
 
     testWidgets('should show AppBar with title "Today"',
         (WidgetTester tester) async {
-      await tester.pumpWidget(rootWidget);
+      await _buildWidget(tester);
       expect(
           find.descendant(
               of: find.byType(AppBar), matching: find.text('Today')),
@@ -34,13 +39,13 @@ void main() {
 
     testWidgets('should show floatingActionButton "Add"',
         (WidgetTester tester) async {
-      await tester.pumpWidget(rootWidget);
+      await _buildWidget(tester);
       expect(find.byIcon(Icons.add), findsOneWidget);
     });
 
     testWidgets('should show bottom navigation with "MainScreen" selected',
         (WidgetTester tester) async {
-      await tester.pumpWidget(rootWidget);
+      await _buildWidget(tester);
       Finder finderBar = find.byType(BottomNavigationBar);
       expect(finderBar, findsOneWidget);
       BottomNavigationBar bar = tester.widget<BottomNavigationBar>(
@@ -49,9 +54,10 @@ void main() {
     });
 
     group('and user taps one of the icons on navigation bar', () {
-      testWidgets('should show bottom navigation with "GroceryScreen" selected',
+      testWidgets(
+          'should show bottom navigation with "GroceryListScreen" selected',
           (WidgetTester tester) async {
-        await tester.pumpWidget(rootWidget);
+        await _buildWidget(tester);
         await tester.tap(find.byIcon(screens[1].icon.icon));
         await tester.pumpAndSettle();
 
@@ -66,9 +72,9 @@ void main() {
         expect(find.byType(GroceryScreen), findsOneWidget);
       });
 
-      testWidgets('should show bottom navigation with "Events" selected',
+      testWidgets('should show bottom navigation with "EventsScreen" selected',
           (WidgetTester tester) async {
-        await tester.pumpWidget(rootWidget);
+        await _buildWidget(tester);
         await tester.tap(find.byIcon(screens[0].icon.icon));
         await tester.pumpAndSettle();
 
@@ -79,22 +85,22 @@ void main() {
         // TIP: Find widget childs inside another widget
         expect(find.descendant(of: bar, matching: title), findsOneWidget);
         expect(find.descendant(of: bar, matching: menuIcon), findsOneWidget);
-        expect(find.byType(MainScreen), findsOneWidget);
+        expect(find.byType(EventsScreen), findsOneWidget);
       });
     });
 
     group('and user taps on floating action button', () {
-      testWidgets('should show add form for "Grocery"',
+      testWidgets('should show screen for adding "Grocery products"',
           (WidgetTester tester) async {
-        await tester.pumpWidget(rootWidget);
+        await _buildWidget(tester);
+        expect(find.byType(ListView), findsOneWidget);
 
-        await tester.tap(find.byIcon(screens[1].icon.icon));
+        await tester.tap(find.byIcon(Icons.shopping_cart));
         await tester.pumpAndSettle();
+        expect(find.byType(GroceryScreen), findsOneWidget);
 
-        await tester.tap(find.byIcon(screens[1].appBarIcon.icon));
-        await tester.pumpAndSettle(Duration(milliseconds: 2000));
-
-        expect(find.text('Add grocery'), findsOneWidget);
+        await tester.tap(find.byIcon(Icons.add));
+        await tester.pumpAndSettle();
         expect(find.byType(AddGroceryScreen), findsOneWidget);
       });
     });
