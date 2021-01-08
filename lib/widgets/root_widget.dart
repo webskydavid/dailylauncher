@@ -15,7 +15,7 @@ List<ScreenModel> screens = [
     'Grocery',
     Icon(Icons.shopping_cart),
     Icon(Icons.menu),
-    AddGroceryScreen(),
+    AddGroceryProductScreen(),
     GroceryScreen(),
   ),
 ];
@@ -59,7 +59,7 @@ class _RootWidgetState extends State<RootWidget> {
         Navigator.of(context).push(MaterialPageRoute(
           builder: (context) {
             if (currentTabIndex == 1) {
-              return AddGroceryScreen();
+              return AddGroceryProductScreen();
             } else {
               return Scaffold(
                 body: Center(
