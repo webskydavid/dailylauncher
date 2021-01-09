@@ -9,8 +9,8 @@ List<ScreenModel> screens = [
     'AddGroceryProductScreen',
     Icon(Icons.ac_unit),
     Icon(Icons.ac_unit),
-    AddGroceryProductScreen(),
-    GroceryScreen(),
+    AddProductScreen(),
+    ShoppingListScreen(),
   ),
   ScreenModel(
     'test',
@@ -74,7 +74,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Product added'), findsOneWidget);
-      expect(find.byType(GroceryScreen), findsOneWidget);
+      expect(find.byType(ShoppingListScreen), findsOneWidget);
     });
 
     testWidgets('should not save form and show errors',

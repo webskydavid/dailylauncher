@@ -34,8 +34,8 @@ class Screens {
       'Grocery',
       Icon(Icons.shopping_cart),
       Icon(Icons.menu),
-      AddGroceryProductScreen(),
-      GroceryScreen(),
+      AddProductScreen(),
+      ShoppingListScreen(),
     ),
   ];
 }
