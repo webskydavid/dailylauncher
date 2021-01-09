@@ -1,13 +1,52 @@
+import 'package:dailylauncher/models/models.dart';
 import 'package:dailylauncher/screens/screens.dart';
+import 'package:dailylauncher/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+List<ScreenModel> screens = [
+  ScreenModel(
+    'AddGroceryProductScreen',
+    Icon(Icons.ac_unit),
+    Icon(Icons.ac_unit),
+    AddGroceryProductScreen(),
+    GroceryScreen(),
+  ),
+  ScreenModel(
+    'test',
+    Icon(Icons.ac_unit),
+    Icon(Icons.ac_unit),
+    Text(''),
+    Text(''),
+  )
+];
 void main() {
   Future<void> _buildWidget(WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
-      home: AddGroceryProductScreen(),
+      home: RootWidget(screens),
     ));
+
+    // await expectLater(
+    //   find.byType(GroceryScreen),
+    //   matchesGoldenFile('./init_grocery_screen.png'),
+    // );
+
+    expect(find.byIcon(Icons.add), findsOneWidget);
+    await tester.tap(find.byIcon(Icons.add));
+    await tester.pumpAndSettle();
   }
+
+  group('GroceryScreen list of items', () {
+    testWidgets('should show 2 items on the list', (WidgetTester tester) async {
+      await _buildWidget(tester);
+      expect(find.widgetWithText(AppBar, 'Add product'), findsOneWidget);
+      expect(find.byType(BackButton), findsOneWidget);
+      expect(find.text('Name'), findsOneWidget);
+      expect(find.text('Price'), findsOneWidget);
+      expect(find.text('Amount'), findsOneWidget);
+      expect(find.text('Save'), findsOneWidget);
+    });
+  });
 
   group('AddGroceryProduct', () {
     testWidgets('should show form inputs', (WidgetTester tester) async {
@@ -32,9 +71,10 @@ void main() {
       await tester.enterText(amount, '2');
 
       await tester.tap(save);
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       expect(find.text('Product added'), findsOneWidget);
+      expect(find.byType(GroceryScreen), findsOneWidget);
     });
 
     testWidgets('should not save form and show errors',

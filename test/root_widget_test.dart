@@ -1,3 +1,4 @@
+import 'package:dailylauncher/main.dart';
 import 'package:dailylauncher/screens/screens.dart';
 import 'package:dailylauncher/widgets/widgets.dart';
 
@@ -7,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   Future<void> _buildWidget(WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
-      home: RootWidget(),
+      home: RootWidget(Screens.list),
     ));
   }
 
@@ -15,12 +16,13 @@ void main() {
     testWidgets('should have specific number of icons',
         (WidgetTester tester) async {
       await _buildWidget(tester);
-      expect(
-          find.descendant(
-              of: find.byType(BottomNavigationBar),
-              matching: find.byType(Icon)),
-          findsNWidgets(2));
+      Finder bottomNavigationBar = find.byType(BottomNavigationBar);
+      Finder icon = find.byType(Icon);
+      Finder icons = find.descendant(of: bottomNavigationBar, matching: icon);
+      int count = tester.widgetList(icons).length;
+      expect(count, greaterThanOrEqualTo(2));
     });
+
     testWidgets('should show MainScreen', (WidgetTester tester) async {
       await _buildWidget(tester);
       expect(find.byType(Scaffold), findsOneWidget);
@@ -58,11 +60,11 @@ void main() {
           'should show bottom navigation with "GroceryListScreen" selected',
           (WidgetTester tester) async {
         await _buildWidget(tester);
-        await tester.tap(find.byIcon(screens[1].icon.icon));
+        await tester.tap(find.byIcon(Screens.list[1].icon.icon));
         await tester.pumpAndSettle();
 
         Finder bar = find.byType(AppBar);
-        Finder title = find.text(screens[1].title);
+        Finder title = find.text(Screens.list[1].title);
         Finder menuIcon = find.byIcon(Icons.menu);
 
         // TIP: Find widget inside another widget
@@ -75,11 +77,11 @@ void main() {
       testWidgets('should show bottom navigation with "EventsScreen" selected',
           (WidgetTester tester) async {
         await _buildWidget(tester);
-        await tester.tap(find.byIcon(screens[0].icon.icon));
+        await tester.tap(find.byIcon(Screens.list[0].icon.icon));
         await tester.pumpAndSettle();
 
         Finder bar = find.byType(AppBar);
-        Finder title = find.text(screens[0].title);
+        Finder title = find.text(Screens.list[0].title);
         Finder menuIcon = find.byIcon(Icons.calendar_today);
 
         // TIP: Find widget childs inside another widget

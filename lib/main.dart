@@ -1,5 +1,8 @@
+import 'package:dailylauncher/screens/screens.dart';
 import 'package:dailylauncher/widgets/root_widget.dart';
 import 'package:flutter/material.dart';
+
+import 'models/models.dart';
 
 void main() {
   runApp(App());
@@ -13,7 +16,26 @@ class App extends StatelessWidget {
     return MaterialApp(
       title: 'Coś',
       darkTheme: ThemeData.dark(),
-      home: RootWidget(),
+      home: RootWidget(Screens.list),
     );
   }
+}
+
+class Screens {
+  static List<ScreenModel> list = [
+    ScreenModel(
+      'Today',
+      Icon(Icons.event),
+      Icon(Icons.calendar_today),
+      Text('Event add'),
+      EventsScreen(),
+    ),
+    ScreenModel(
+      'Grocery',
+      Icon(Icons.shopping_cart),
+      Icon(Icons.menu),
+      AddGroceryProductScreen(),
+      GroceryScreen(),
+    ),
+  ];
 }

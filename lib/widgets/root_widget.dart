@@ -3,37 +3,23 @@ import 'package:dailylauncher/screens/screens.dart';
 
 import 'package:flutter/material.dart';
 
-List<ScreenModel> screens = [
-  ScreenModel(
-    'Today',
-    Icon(Icons.event),
-    Icon(Icons.calendar_today),
-    CircularProgressIndicator(),
-    EventsScreen(),
-  ),
-  ScreenModel(
-    'Grocery',
-    Icon(Icons.shopping_cart),
-    Icon(Icons.menu),
-    AddGroceryProductScreen(),
-    GroceryScreen(),
-  ),
-];
-
 class RootWidget extends StatefulWidget {
+  final List<ScreenModel> screens;
+
+  RootWidget(this.screens);
+
   @override
   _RootWidgetState createState() => _RootWidgetState();
 }
 
 class _RootWidgetState extends State<RootWidget> {
   int currentTabIndex = 0;
-  List<ScreenModel> allScreens = screens;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: _appBar(),
-      body: allScreens[currentTabIndex].screenWidget,
+      body: widget.screens[currentTabIndex].screenWidget,
       floatingActionButton: _floatingActionButton(),
       bottomNavigationBar: _bottomNavigationBar(),
     );
@@ -42,11 +28,11 @@ class _RootWidgetState extends State<RootWidget> {
   AppBar _appBar() {
     return AppBar(
       leading: BackButton(),
-      title: Text(allScreens[currentTabIndex].title),
+      title: Text(widget.screens[currentTabIndex].title),
       actions: [
         IconButton(
           onPressed: () {},
-          icon: allScreens[currentTabIndex].appBarIcon,
+          icon: widget.screens[currentTabIndex].appBarIcon,
         )
       ],
     );
@@ -56,21 +42,12 @@ class _RootWidgetState extends State<RootWidget> {
     return IconButton(
       icon: Icon(Icons.add),
       onPressed: () {
-        Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) {
-            if (currentTabIndex == 1) {
-              return AddGroceryProductScreen();
-            } else {
-              return Scaffold(
-                body: Center(
-                  child: Column(
-                    children: [Text('Add event'), BackButton()],
-                  ),
-                ),
-              );
-            }
-          },
-        ));
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) =>
+                widget.screens[currentTabIndex].floatingActionWidget,
+          ),
+        );
       },
     );
   }
@@ -83,7 +60,7 @@ class _RootWidgetState extends State<RootWidget> {
           currentTabIndex = tabIndex;
         });
       },
-      items: allScreens
+      items: widget.screens
           .map(
             (e) => BottomNavigationBarItem(icon: e.icon, label: e.title),
           )
