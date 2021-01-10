@@ -1,10 +1,18 @@
 Daily Launcher
 
-POC: @high 
-  ☐ Data structure
-  ☐ Models 
-  ☐ Test data structure and models
-    Test how data are combined and test models and relations
+POC 0.1.0: @high  
+  ✔ Ability to change screens @done(21-01-10 14:06)
+  ✔ EventsScreen for current day @done(21-01-10 14:03)
+    Show only empty screen
+  ✔ Shopping list @done(21-01-10 14:02)
+    Showing products on the list without functionality
+  ✔ Add new product @done(21-01-10 14:02)
+    Only adding (id, name, price, amount, done)
+
+POC 0.2.0:
+  ☐ Save products with additional parameters
+    If current product has additional params (kcal, proteins, etc...) then add to products box
+  ☐ Recipes list
 
 
 CI configuration:
