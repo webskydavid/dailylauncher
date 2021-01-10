@@ -1,15 +1,25 @@
 import 'package:dailylauncher/main.dart';
+import 'package:dailylauncher/providers/product_provider.dart';
 import 'package:dailylauncher/screens/screens.dart';
 import 'package:dailylauncher/widgets/widgets.dart';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/all.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  String fixedTime = DateTime(2020, 10, 10).millisecondsSinceEpoch.toString();
   Future<void> _buildWidget(WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      home: RootWidget(Screens.list),
-    ));
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          clockProvider.overrideWithValue(StateController(() => fixedTime))
+        ],
+        child: MaterialApp(
+          home: RootWidget(Screens.list),
+        ),
+      ),
+    );
   }
 
   group('RootWidget', () {
@@ -72,10 +82,10 @@ void main() {
       Future<void> _goToShoppingListScreen(WidgetTester tester) async {
         Finder bottomNavigationIcon = find.byIcon(Screens.list[1].icon.icon);
         await tester.tap(bottomNavigationIcon);
-        await tester.pump();
+        await tester.pump(Duration(milliseconds: 1000));
 
         expect(find.byType(CircularProgressIndicator), findsOneWidget);
-        await tester.pumpAndSettle();
+        await tester.pumpAndSettle(Duration(milliseconds: 1000));
         expect(find.byType(CircularProgressIndicator), findsNothing);
         expect(find.byType(ShoppingListScreen), findsOneWidget);
       }
@@ -101,6 +111,13 @@ void main() {
       });
 
       group('and user taps on FAB "add"', () {
+        final Finder shoppingListScreen = find.byType(ShoppingListScreen);
+        final Finder name = find.widgetWithText(TextField, 'Name');
+        final Finder price = find.widgetWithText(TextField, 'Price');
+        final Finder amount = find.widgetWithText(TextField, 'Amount');
+        final Finder save = find.widgetWithText(ElevatedButton, 'Save');
+        final Finder progressIndicator = find.byType(CircularProgressIndicator);
+
         Future<void> _goToAddProductScreen(WidgetTester tester) async {
           await tester.tap(find.byIcon(Icons.add));
           await tester.pumpAndSettle();
@@ -121,25 +138,29 @@ void main() {
             await _goToShoppingListScreen(tester);
             await _goToAddProductScreen(tester);
 
-            final Finder name = find.widgetWithText(TextField, 'Name');
-            final Finder price = find.widgetWithText(TextField, 'Price');
-            final Finder amount = find.widgetWithText(TextField, 'Amount');
-            final Finder save = find.widgetWithText(ElevatedButton, 'Save');
-
             await tester.enterText(name, 'Eggs');
             await tester.enterText(price, '30.0');
             await tester.enterText(amount, '2');
 
             await tester.tap(save);
-            await tester.pumpAndSettle();
+            await tester.pump();
 
-            final Finder list = find.byType(ListView);
-            final Finder productItem = find.byType(Text);
+            expect(progressIndicator, findsOneWidget);
+            await tester.pumpAndSettle();
+            expect(progressIndicator, findsNothing);
 
             expect(find.text('Product added'), findsOneWidget);
-            expect(find.byType(ShoppingListScreen), findsOneWidget);
-            expect(find.descendant(of: list, matching: productItem),
-                findsNWidgets(1));
+            await tester.pumpAndSettle();
+            expect(progressIndicator, findsNothing);
+            expect(shoppingListScreen, findsOneWidget);
+            expect(tester.widgetList(find.byType(ProductWidget)), [
+              isA<ProductWidget>()
+                  .having((s) => s.product.id, 'product.id', fixedTime)
+                  .having((s) => s.product.name, 'product.name', 'Eggs')
+                  .having((s) => s.product.price, 'product.price', '30.0')
+                  .having((s) => s.product.amount, 'product.amount', '2')
+                  .having((s) => s.product.done, 'product.done', false),
+            ]);
           });
         });
 
@@ -149,11 +170,6 @@ void main() {
             await _buildWidget(tester);
             await _goToShoppingListScreen(tester);
             await _goToAddProductScreen(tester);
-
-            final Finder name = find.widgetWithText(TextField, 'Name');
-            final Finder price = find.widgetWithText(TextField, 'Price');
-            final Finder amount = find.widgetWithText(TextField, 'Amount');
-            final Finder save = find.widgetWithText(ElevatedButton, 'Save');
 
             await tester.enterText(name, '');
             await tester.enterText(price, '');

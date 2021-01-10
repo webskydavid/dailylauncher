@@ -1,11 +1,12 @@
 import 'package:dailylauncher/screens/screens.dart';
 import 'package:dailylauncher/widgets/root_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'models/models.dart';
 
 void main() {
-  runApp(App());
+  runApp(ProviderScope(child: App()));
 }
 
 class App extends StatelessWidget {

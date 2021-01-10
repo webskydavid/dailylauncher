@@ -1,6 +1,4 @@
 import 'package:dailylauncher/models/models.dart';
-import 'package:dailylauncher/screens/screens.dart';
-
 import 'package:flutter/material.dart';
 
 class RootWidget extends StatefulWidget {
