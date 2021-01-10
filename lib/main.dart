@@ -15,7 +15,7 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Coś',
+      title: 'Daily Launcher',
       darkTheme: ThemeData.dark(),
       home: RootWidget(Screens.list),
     );
