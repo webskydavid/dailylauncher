@@ -91,7 +91,7 @@ class _ProductFormWidgetState extends State<ProductFormWidget> {
           ElevatedButton(
             onPressed: () {
               if (_formKey.currentState.validate()) {
-                context.read(productsProvider).add(
+                context.read(productsProvider).create(
                       ProductModel(
                         name: name,
                         price: price,

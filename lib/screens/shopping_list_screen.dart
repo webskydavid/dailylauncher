@@ -8,22 +8,42 @@ class ShoppingListScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(child: Consumer(
-      builder: (context, watch, child) {
-        AsyncValue<List> products = watch(listOfProductsProvider);
-        return products.when(
-          data: (data) {
-            return ListView.builder(
-              itemCount: data.length,
-              itemBuilder: (_, i) => ProductWidget(
-                product: data[i],
+    return Container(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            Expanded(
+              child: Consumer(
+                builder: (context, watch, child) {
+                  AsyncValue<List> products = watch(listOfProductsProvider);
+                  return products.when(
+                    data: (data) {
+                      return ListView.builder(
+                        itemCount: data.length,
+                        itemBuilder: (_, i) => ProductWidget(
+                          product: data[i],
+                        ),
+                      );
+                    },
+                    loading: () => Center(child: CircularProgressIndicator()),
+                    error: (e, t) => Text('error $e'),
+                  );
+                },
               ),
-            );
-          },
-          loading: () => CircularProgressIndicator(),
-          error: (e, t) => Text('error $e'),
-        );
-      },
-    ));
+            ),
+            Consumer(
+              builder: (context, watch, child) {
+                AsyncValue<Map<String, dynamic>> counter =
+                    watch(productCounterProvider);
+                return counter.when(
+                  loading: () => Container(),
+                  error: (error, stack) =>
+                      Text('Oops, something unexpected happened'),
+                  data: (value) => Text('${value['done']}/${value['all']}'),
+                );
+              },
+            )
+          ],
+        ));
   }
 }

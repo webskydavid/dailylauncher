@@ -1,6 +1,6 @@
 Daily Launcher
 
-POC 0.1.0: @high  
+✔ POC 0.1.0: @high @done(21-01-10 17:13)
   ✔ Ability to change screens @done(21-01-10 14:06)
   ✔ EventsScreen for current day @done(21-01-10 14:03)
     Show only empty screen
@@ -10,13 +10,21 @@ POC 0.1.0: @high
     Only adding (id, name, price, amount, done)
 
 POC 0.2.0:
+  ☐ Error handling @high 
+  ☐ Create unique id for products (uuid package)
+    Change clockProvider to uuidProvider
+  ✔ Toggle checkbox to change product status (done=true/false) @started(21-01-10 20:30) @done(21-01-11 14:54) @lasted(18h24m9s)
   ☐ Save products with additional parameters
-    If current product has additional params (kcal, proteins, etc...) then add to products box
-  ☐ Recipes list
+    Add barcode parameter
+    Current product has additional params (kcal, proteins etc...) 
+  ☐ Refactor tests
+  ☐ Form validation (isNotEmpty, isNumber, isUuid, etc.)
+  
 
 
 CI configuration:
-  ☐ Configure CI on codemagic
+  ✔ Configure CI on codemagic @done(21-01-10 16:53)
+  ✔ Integrate with github (PR update trigger testing) @done(21-01-10 16:53)
   ☐ Add bumping version if new build is created
   ☐ Add release file to github release and send it via email
 

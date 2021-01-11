@@ -1,5 +1,7 @@
 import 'package:dailylauncher/main.dart';
+import 'package:dailylauncher/models/product_model.dart';
 import 'package:dailylauncher/providers/product_provider.dart';
+import 'package:dailylauncher/repositories/mock_product_repository.dart';
 import 'package:dailylauncher/screens/screens.dart';
 import 'package:dailylauncher/widgets/widgets.dart';
 
@@ -79,6 +81,15 @@ void main() {
     });
 
     group('when show ShoppingList', () {
+      final List<ProductModel> mockDataProducts = [
+        ProductModel(
+          id: '1',
+          name: 'Name',
+          amount: '1',
+          done: false,
+          price: '0.0',
+        )
+      ];
       Future<void> _goToShoppingListScreen(WidgetTester tester) async {
         Finder bottomNavigationIcon = find.byIcon(Screens.list[1].icon.icon);
         await tester.tap(bottomNavigationIcon);
@@ -110,6 +121,48 @@ void main() {
         expect(find.byIcon(Icons.add), findsOneWidget);
       });
 
+      testWidgets('should toggle checkbox and show changing status',
+          (WidgetTester tester) async {
+        final Finder products = find.descendant(
+            of: find.byType(ListView), matching: find.byType(ProductWidget));
+        final Finder checkbox = find.byType(Checkbox);
+        final Finder firstCheckbox =
+            find.descendant(of: products.first, matching: checkbox);
+
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              productRepositoryProvider.overrideWithProvider(
+                Provider((ref) => MockProductRepository(mockDataProducts)),
+              ),
+              clockProvider.overrideWithValue(
+                StateController(() => fixedTime),
+              ),
+            ],
+            child: MaterialApp(
+              home: RootWidget(Screens.list),
+            ),
+          ),
+        );
+        await _goToShoppingListScreen(tester);
+
+        expect(find.byType(ListView), findsOneWidget);
+        expect(products, findsNWidgets(mockDataProducts.length));
+        expect(tester.widget(firstCheckbox),
+            isA<Checkbox>().having((s) => s.value, 'value', false));
+
+        expect(find.text('0/1'), findsOneWidget);
+        expect(find.text('1/1'), findsNothing);
+
+        await tester.tap(firstCheckbox);
+        await tester.pumpAndSettle();
+
+        expect(tester.widget(firstCheckbox),
+            isA<Checkbox>().having((s) => s.value, 'value', true));
+        expect(find.text('0/1'), findsNothing);
+        expect(find.text('1/1'), findsOneWidget);
+      });
+
       group('and user taps on FAB "add"', () {
         final Finder shoppingListScreen = find.byType(ShoppingListScreen);
         final Finder name = find.widgetWithText(TextField, 'Name');
@@ -132,16 +185,26 @@ void main() {
         });
 
         group('and user save form', () {
+          Map values = {
+            'id': fixedTime,
+            'name': 'Eggs',
+            'price': '30.0',
+            'amount': '1',
+            'done': false
+          };
+
+          Future<void> _populateForm(WidgetTester tester, Map data) async {
+            await tester.enterText(name, data['name']);
+            await tester.enterText(price, data['price']);
+            await tester.enterText(amount, data['amount']);
+          }
+
           testWidgets('should show 1 item on the list',
               (WidgetTester tester) async {
             await _buildWidget(tester);
             await _goToShoppingListScreen(tester);
             await _goToAddProductScreen(tester);
-
-            await tester.enterText(name, 'Eggs');
-            await tester.enterText(price, '30.0');
-            await tester.enterText(amount, '2');
-
+            await _populateForm(tester, values);
             await tester.tap(save);
             await tester.pump();
 
@@ -155,11 +218,11 @@ void main() {
             expect(shoppingListScreen, findsOneWidget);
             expect(tester.widgetList(find.byType(ProductWidget)), [
               isA<ProductWidget>()
-                  .having((s) => s.product.id, 'product.id', fixedTime)
-                  .having((s) => s.product.name, 'product.name', 'Eggs')
-                  .having((s) => s.product.price, 'product.price', '30.0')
-                  .having((s) => s.product.amount, 'product.amount', '2')
-                  .having((s) => s.product.done, 'product.done', false),
+                  .having((s) => s.product.id, 'id', values['id'])
+                  .having((s) => s.product.name, 'name', values['name'])
+                  .having((s) => s.product.price, 'price', values['price'])
+                  .having((s) => s.product.amount, 'amount', values['amount'])
+                  .having((s) => s.product.done, 'done', values['done']),
             ]);
           });
         });

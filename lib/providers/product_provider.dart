@@ -1,11 +1,15 @@
 // PRODUCT LIST CLASS
 import 'package:dailylauncher/models/models.dart';
+import 'package:dailylauncher/repositories/mock_product_repository.dart';
+import 'package:dailylauncher/repositories/product_repository.dart';
 import 'package:flutter_riverpod/all.dart';
 
 class ProductList extends StateNotifier<AsyncValue<List<ProductModel>>> {
-  final List<ProductModel> list = [];
+  final ProductRepository productRepository;
   final clock;
-  ProductList(this.clock, [AsyncValue<List<ProductModel>> products])
+
+  ProductList(this.productRepository, this.clock,
+      [AsyncValue<List<ProductModel>> products])
       : super(products ?? AsyncValue.loading()) {
     _init();
   }
@@ -15,36 +19,52 @@ class ProductList extends StateNotifier<AsyncValue<List<ProductModel>>> {
   }
 
   Future<void> getAll() async {
-    try {
-      await Future.delayed(Duration(milliseconds: 100));
-      state = AsyncValue.data(list);
-    } catch (e) {
-      state = AsyncValue.error('getAll() $e');
-    }
+    List result = await productRepository.readAll();
+    state = AsyncValue.data(result);
   }
 
-  Future<void> add(ProductModel product) async {
-    try {
-      state = AsyncValue.loading();
-      await Future.delayed(Duration(milliseconds: 100));
-      product.id = clock();
-      list.add(product);
-      await getAll();
-    } catch (e) {
-      state = AsyncValue.error('getAll() $e');
-    }
+  Future<void> create(ProductModel product) async {
+    state = AsyncValue.loading();
+    product.id = clock();
+    await productRepository.create(product);
+    await getAll();
+  }
+
+  Future<void> update(ProductModel product) async {
+    state = AsyncValue.loading();
+    await productRepository.update(product);
+    await getAll();
   }
 }
 
-// PROVIDERS
+// REPOSITORY
+// ignore: todo
+// TODO: Remove Mock
+final productRepositoryProvider =
+    Provider<ProductRepository>((ref) => MockProductRepository([]));
+
+// UI PROVIDERS
 final productsProvider = StateNotifierProvider<ProductList>((ref) {
-  var clock = ref.watch(clockProvider).state;
-  return ProductList(clock);
+  var productRepository = ref.read(productRepositoryProvider);
+  var clock = ref.read(clockProvider).state;
+  return ProductList(productRepository, clock);
 });
 
-final listOfProductsProvider = Provider<AsyncValue<List<dynamic>>>((ref) {
+final listOfProductsProvider = Provider<AsyncValue<List<ProductModel>>>((ref) {
   final AsyncValue products = ref.watch(productsProvider.state);
   return products;
+});
+
+final productCounterProvider =
+    Provider<AsyncValue<Map<String, dynamic>>>((ref) {
+  final AsyncValue<List<ProductModel>> products =
+      ref.watch(productsProvider.state);
+  return products.whenData((value) {
+    return {
+      'done': value.where((element) => element.done).length,
+      'all': value.length
+    };
+  });
 });
 
 final clockProvider = StateProvider<Function>((ref) {
