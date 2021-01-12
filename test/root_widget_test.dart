@@ -1,7 +1,7 @@
 import 'package:dailylauncher/main.dart';
-import 'package:dailylauncher/models/product_model.dart';
-import 'package:dailylauncher/providers/product_provider.dart';
-import 'package:dailylauncher/repositories/mock_product_repository.dart';
+import 'package:dailylauncher/models/models.dart';
+import 'package:dailylauncher/providers/providers.dart';
+import 'package:dailylauncher/repositories/repository.dart';
 import 'package:dailylauncher/screens/screens.dart';
 import 'package:dailylauncher/widgets/widgets.dart';
 
@@ -15,7 +15,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          clockProvider.overrideWithValue(StateController(() => fixedTime))
+          uuidProvider.overrideWithValue(StateController(() => fixedTime))
         ],
         child: MaterialApp(
           home: RootWidget(Screens.list),
@@ -135,7 +135,7 @@ void main() {
               productRepositoryProvider.overrideWithProvider(
                 Provider((ref) => MockProductRepository(mockDataProducts)),
               ),
-              clockProvider.overrideWithValue(
+              uuidProvider.overrideWithValue(
                 StateController(() => fixedTime),
               ),
             ],

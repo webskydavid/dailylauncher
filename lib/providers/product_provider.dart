@@ -1,14 +1,14 @@
 // PRODUCT LIST CLASS
 import 'package:dailylauncher/models/models.dart';
-import 'package:dailylauncher/repositories/mock_product_repository.dart';
-import 'package:dailylauncher/repositories/product_repository.dart';
+import 'package:dailylauncher/providers/providers.dart';
+import 'package:dailylauncher/repositories/repository.dart';
 import 'package:flutter_riverpod/all.dart';
 
 class ProductList extends StateNotifier<AsyncValue<List<ProductModel>>> {
   final ProductRepository productRepository;
-  final clock;
+  final Function uuidProvider;
 
-  ProductList(this.productRepository, this.clock,
+  ProductList(this.productRepository, this.uuidProvider,
       [AsyncValue<List<ProductModel>> products])
       : super(products ?? AsyncValue.loading()) {
     _init();
@@ -25,7 +25,7 @@ class ProductList extends StateNotifier<AsyncValue<List<ProductModel>>> {
 
   Future<void> create(ProductModel product) async {
     state = AsyncValue.loading();
-    product.id = clock();
+    product.id = uuidProvider();
     await productRepository.create(product);
     await getAll();
   }
@@ -46,12 +46,13 @@ final productRepositoryProvider =
 // UI PROVIDERS
 final productsProvider = StateNotifierProvider<ProductList>((ref) {
   var productRepository = ref.read(productRepositoryProvider);
-  var clock = ref.read(clockProvider).state;
+  var clock = ref.read(uuidProvider).state;
   return ProductList(productRepository, clock);
 });
 
 final listOfProductsProvider = Provider<AsyncValue<List<ProductModel>>>((ref) {
   final AsyncValue products = ref.watch(productsProvider.state);
+
   return products;
 });
 
@@ -65,8 +66,4 @@ final productCounterProvider =
       'all': value.length
     };
   });
-});
-
-final clockProvider = StateProvider<Function>((ref) {
-  return () => DateTime.now().millisecondsSinceEpoch.toString();
 });

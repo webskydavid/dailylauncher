@@ -7,6 +7,13 @@ class MockProductRepository implements ProductRepository {
   List<ProductModel> list = [];
 
   @override
+  Future<ProductModel> readOne(ProductModel product) async {
+    print('Mock readOne()');
+    await Future.delayed(Duration(milliseconds: 300));
+    return list.singleWhere((element) => element.id == product.id);
+  }
+
+  @override
   Future<List<ProductModel>> readAll() async {
     print('Mock readAll()');
     await Future.delayed(Duration(milliseconds: 300));
@@ -25,13 +32,6 @@ class MockProductRepository implements ProductRepository {
     print('Mock delete()');
     await Future.delayed(Duration(milliseconds: 300));
     list.remove(product);
-  }
-
-  @override
-  Future<ProductModel> readOne(ProductModel product) async {
-    print('Mock readOne()');
-    await Future.delayed(Duration(milliseconds: 300));
-    return list.singleWhere((element) => element.id == product.id);
   }
 
   @override
