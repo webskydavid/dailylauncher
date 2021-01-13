@@ -8,12 +8,16 @@
             "name": "Dart: Run all Tests",
             "type": "dart",
             "request": "launch",
-            "program": "./test/ --update-goldens"
+            "program": "./test/",
+            "args": [
+                "--update-goldens"
+            ]
         },
         {
             "name": "dailylauncher",
             "request": "launch",
-            "type": "dart"
+            "type": "dart",
+            "program": "./lib/main.dart",
         }
     ]
 }

@@ -10,12 +10,12 @@ import 'package:flutter_riverpod/all.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  String fixedTime = DateTime(2020, 10, 10).millisecondsSinceEpoch.toString();
+  String uuid = 'uuid';
   Future<void> _buildWidget(WidgetTester tester) async {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          uuidProvider.overrideWithValue(StateController(() => fixedTime))
+          uuidProvider.overrideWithValue(StateController(() => uuid))
         ],
         child: MaterialApp(
           home: RootWidget(Screens.list),
@@ -83,7 +83,7 @@ void main() {
     group('when show ShoppingList', () {
       final List<ProductModel> mockDataProducts = [
         ProductModel(
-          id: '1',
+          id: uuid,
           name: 'Name',
           amount: '1',
           done: false,
@@ -136,7 +136,7 @@ void main() {
                 Provider((ref) => MockProductRepository(mockDataProducts)),
               ),
               uuidProvider.overrideWithValue(
-                StateController(() => fixedTime),
+                StateController(() => uuid),
               ),
             ],
             child: MaterialApp(
@@ -155,7 +155,7 @@ void main() {
         expect(find.text('1/1'), findsNothing);
 
         await tester.tap(firstCheckbox);
-        await tester.pumpAndSettle();
+        await tester.pumpAndSettle(Duration(milliseconds: 300));
 
         expect(tester.widget(firstCheckbox),
             isA<Checkbox>().having((s) => s.value, 'value', true));
@@ -169,7 +169,6 @@ void main() {
         final Finder price = find.widgetWithText(TextField, 'Price');
         final Finder amount = find.widgetWithText(TextField, 'Amount');
         final Finder save = find.widgetWithText(ElevatedButton, 'Save');
-        final Finder progressIndicator = find.byType(CircularProgressIndicator);
 
         Future<void> _goToAddProductScreen(WidgetTester tester) async {
           await tester.tap(find.byIcon(Icons.add));
@@ -186,7 +185,7 @@ void main() {
 
         group('and user save form', () {
           Map values = {
-            'id': fixedTime,
+            'id': uuid,
             'name': 'Eggs',
             'price': '30.0',
             'amount': '1',
@@ -206,15 +205,9 @@ void main() {
             await _goToAddProductScreen(tester);
             await _populateForm(tester, values);
             await tester.tap(save);
-            await tester.pump();
-
-            expect(progressIndicator, findsOneWidget);
             await tester.pumpAndSettle();
-            expect(progressIndicator, findsNothing);
 
             expect(find.text('Product added'), findsOneWidget);
-            await tester.pumpAndSettle();
-            expect(progressIndicator, findsNothing);
             expect(shoppingListScreen, findsOneWidget);
             expect(tester.widgetList(find.byType(ProductWidget)), [
               isA<ProductWidget>()
@@ -227,7 +220,7 @@ void main() {
           });
         });
 
-        group('and user save invalid form', () {
+        group('and user populate form with invalid values', () {
           testWidgets('should not save form and should show errors',
               (WidgetTester tester) async {
             await _buildWidget(tester);

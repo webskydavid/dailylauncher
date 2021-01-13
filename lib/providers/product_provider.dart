@@ -5,6 +5,7 @@ import 'package:dailylauncher/repositories/repository.dart';
 import 'package:flutter_riverpod/all.dart';
 
 class ProductList extends StateNotifier<AsyncValue<List<ProductModel>>> {
+  // TODO: Add cache to store prevous data, load to state the whenData result
   final ProductRepository productRepository;
   final Function uuidProvider;
 
@@ -24,16 +25,21 @@ class ProductList extends StateNotifier<AsyncValue<List<ProductModel>>> {
   }
 
   Future<void> create(ProductModel product) async {
-    state = AsyncValue.loading();
     product.id = uuidProvider();
+    state = state.whenData((value) => [...value]..add(product));
     await productRepository.create(product);
-    await getAll();
   }
 
   Future<void> update(ProductModel product) async {
-    state = AsyncValue.loading();
     await productRepository.update(product);
-    await getAll();
+    state = state.whenData(
+      (value) => value.map((item) {
+        if (item.id == product.id) {
+          return product;
+        }
+        return item;
+      }).toList(),
+    );
   }
 }
 
@@ -45,9 +51,9 @@ final productRepositoryProvider =
 
 // UI PROVIDERS
 final productsProvider = StateNotifierProvider<ProductList>((ref) {
-  var productRepository = ref.read(productRepositoryProvider);
-  var clock = ref.read(uuidProvider).state;
-  return ProductList(productRepository, clock);
+  var productRepository = ref.watch(productRepositoryProvider);
+  var uuid = ref.read(uuidProvider).state;
+  return ProductList(productRepository, uuid);
 });
 
 final listOfProductsProvider = Provider<AsyncValue<List<ProductModel>>>((ref) {

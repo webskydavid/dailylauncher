@@ -1,3 +1,4 @@
+import 'package:dailylauncher/models/models.dart';
 import 'package:dailylauncher/providers/product_provider.dart';
 import 'package:dailylauncher/widgets/widgets.dart';
 import 'package:flutter/material.dart';
@@ -15,7 +16,7 @@ class ShoppingListScreen extends StatelessWidget {
             Expanded(
               child: Consumer(
                 builder: (context, watch, child) {
-                  AsyncValue<List> products = watch(listOfProductsProvider);
+                  AsyncValue<List> products = watch(productsProvider.state);
                   return products.when(
                     data: (data) {
                       return ListView.builder(
