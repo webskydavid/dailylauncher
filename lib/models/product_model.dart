@@ -18,4 +18,10 @@ class ProductModel {
     this.amount = amount ?? 1;
     this.done = done ?? false;
   }
+
+  @override
+  String toString() {
+    // TODO: implement toString
+    return '$id|$name|$price|$amount|$done';
+  }
 }

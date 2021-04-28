@@ -10,8 +10,10 @@ Daily Launcher
     Only adding (id, name, price, amount, done)
 
 POC 0.2.0:
+  ☐ Filter product list
+  ☐ Implement product with Hive box
   ☐ Error handling @high 
-  ☐ Create unique id for products (uuid package)
+  ✔ Create unique id for products (uuid package) @done(21-01-13 21:58)
     Change clockProvider to uuidProvider
   ✔ Toggle checkbox to change product status (done=true/false) @started(21-01-10 20:30) @done(21-01-11 14:54) @lasted(18h24m9s)
   ☐ Save products with additional parameters

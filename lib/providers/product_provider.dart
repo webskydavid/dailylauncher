@@ -33,12 +33,14 @@ class ProductList extends StateNotifier<AsyncValue<List<ProductModel>>> {
   Future<void> update(ProductModel product) async {
     await productRepository.update(product);
     state = state.whenData(
-      (value) => value.map((item) {
-        if (item.id == product.id) {
-          return product;
-        }
-        return item;
-      }).toList(),
+      (value) => [
+        ...value.map((item) {
+          if (item.id == product.id) {
+            return product;
+          }
+          return item;
+        }).toList()
+      ],
     );
   }
 }
@@ -47,19 +49,28 @@ class ProductList extends StateNotifier<AsyncValue<List<ProductModel>>> {
 // ignore: todo
 // TODO: Remove Mock
 final productRepositoryProvider =
-    Provider<ProductRepository>((ref) => MockProductRepository([]));
+    Provider<ProductRepository>((ref) => MockProductRepository([
+          ProductModel(
+            id: 'uuid',
+            name: 'Piwo',
+            amount: '5',
+            done: false,
+            price: '3.29',
+          ),
+          ProductModel(
+            id: 'uuid',
+            name: 'Jajka',
+            amount: '1',
+            done: true,
+            price: '5.99',
+          )
+        ]));
 
 // UI PROVIDERS
 final productsProvider = StateNotifierProvider<ProductList>((ref) {
   var productRepository = ref.watch(productRepositoryProvider);
   var uuid = ref.read(uuidProvider).state;
   return ProductList(productRepository, uuid);
-});
-
-final listOfProductsProvider = Provider<AsyncValue<List<ProductModel>>>((ref) {
-  final AsyncValue products = ref.watch(productsProvider.state);
-
-  return products;
 });
 
 final productCounterProvider =
@@ -73,3 +84,22 @@ final productCounterProvider =
     };
   });
 });
+
+final filteredProductsProvider =
+    StateProvider<AsyncValue<List<ProductModel>>>((ref) {
+  final filter = ref.watch(filterProvider);
+  final products = ref.watch(productsProvider.state);
+  if (filter.state == Filter.done) {
+    return products.whenData(
+      (value) => value.where((element) => element.done).toList(),
+    );
+  } else if (filter.state == Filter.undone) {
+    return products.whenData(
+      (value) => value.where((element) => !element.done).toList(),
+    );
+  }
+  return products.whenData((value) => [...value]);
+});
+
+enum Filter { all, done, undone }
+final filterProvider = StateProvider((ref) => Filter.all);

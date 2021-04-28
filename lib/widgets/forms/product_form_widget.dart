@@ -30,15 +30,8 @@ class _ProductFormWidgetState extends State<ProductFormWidget> {
                 ScaffoldMessenger.of(context).showSnackBar(snackBar);
               }
             },
-            provider: listOfProductsProvider,
-            child: Consumer(
-              builder: (context, watch, child) {
-                var t = watch(productsProvider.state);
-                return t.maybeWhen(
-                    orElse: () => Container(),
-                    loading: () => CircularProgressIndicator());
-              },
-            ),
+            provider: productsProvider.state,
+            child: Container(),
           ),
           TextFormField(
             initialValue: name,

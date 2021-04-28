@@ -81,15 +81,23 @@ void main() {
     });
 
     group('when show ShoppingList', () {
-      final List<ProductModel> mockDataProducts = [
-        ProductModel(
-          id: uuid,
-          name: 'Name',
-          amount: '1',
-          done: false,
-          price: '0.0',
-        )
-      ];
+      List<ProductModel> mockDataProducts() => ([
+            ProductModel(
+              id: uuid,
+              name: 'Name',
+              amount: '1',
+              done: false,
+              price: '0.0',
+            ),
+            ProductModel(
+              id: uuid,
+              name: 'Name',
+              amount: '1',
+              done: true,
+              price: '0.0',
+            )
+          ]);
+
       Future<void> _goToShoppingListScreen(WidgetTester tester) async {
         Finder bottomNavigationIcon = find.byIcon(Screens.list[1].icon.icon);
         await tester.tap(bottomNavigationIcon);
@@ -133,7 +141,7 @@ void main() {
           ProviderScope(
             overrides: [
               productRepositoryProvider.overrideWithProvider(
-                Provider((ref) => MockProductRepository(mockDataProducts)),
+                Provider((ref) => MockProductRepository(mockDataProducts())),
               ),
               uuidProvider.overrideWithValue(
                 StateController(() => uuid),
@@ -147,20 +155,73 @@ void main() {
         await _goToShoppingListScreen(tester);
 
         expect(find.byType(ListView), findsOneWidget);
-        expect(products, findsNWidgets(mockDataProducts.length));
+        expect(products, findsNWidgets(mockDataProducts().length));
         expect(tester.widget(firstCheckbox),
             isA<Checkbox>().having((s) => s.value, 'value', false));
 
-        expect(find.text('0/1'), findsOneWidget);
-        expect(find.text('1/1'), findsNothing);
+        expect(find.text('1/2'), findsOneWidget);
+        expect(find.text('2/2'), findsNothing);
 
         await tester.tap(firstCheckbox);
         await tester.pumpAndSettle(Duration(milliseconds: 300));
 
         expect(tester.widget(firstCheckbox),
             isA<Checkbox>().having((s) => s.value, 'value', true));
-        expect(find.text('0/1'), findsNothing);
-        expect(find.text('1/1'), findsOneWidget);
+        expect(find.text('1/2'), findsNothing);
+        expect(find.text('2/2'), findsOneWidget);
+      });
+
+      testWidgets('and user wants to filter product list',
+          (WidgetTester tester) async {
+        final Finder allButton = find.ancestor(
+            of: find.text('All'), matching: find.byType(RaisedButton));
+        final Finder doneButton = find.ancestor(
+            of: find.text('Done'), matching: find.byType(RaisedButton));
+        final Finder undoneButton = find.ancestor(
+            of: find.text('Undone'), matching: find.byType(RaisedButton));
+
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              productRepositoryProvider.overrideWithProvider(
+                Provider((ref) => MockProductRepository(mockDataProducts())),
+              ),
+              uuidProvider.overrideWithValue(
+                StateController(() => uuid),
+              ),
+            ],
+            child: MaterialApp(
+              home: RootWidget(Screens.list),
+            ),
+          ),
+        );
+        await _goToShoppingListScreen(tester);
+
+        expect(allButton, findsOneWidget);
+        expect(doneButton, findsOneWidget);
+        expect(undoneButton, findsOneWidget);
+
+        expect(tester.widget<RaisedButton>(allButton).color, Colors.blue);
+        expect(tester.widget<RaisedButton>(doneButton).color,
+            Colors.grey.shade800);
+        expect(tester.widget<RaisedButton>(undoneButton).color,
+            Colors.grey.shade800);
+
+        await tester.tap(doneButton);
+        await tester.pumpAndSettle();
+
+        expect(tester.widgetList(find.byType(ProductWidget)), [
+          isA<ProductWidget>().having(
+              (s) => s.product.done, 'done', mockDataProducts()[1].done),
+        ]);
+
+        await tester.tap(undoneButton);
+        await tester.pumpAndSettle();
+
+        expect(tester.widgetList(find.byType(ProductWidget)), [
+          isA<ProductWidget>().having(
+              (s) => s.product.done, 'done', mockDataProducts()[0].done),
+        ]);
       });
 
       group('and user taps on FAB "add"', () {

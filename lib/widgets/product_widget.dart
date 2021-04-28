@@ -19,11 +19,12 @@ class ProductWidget extends StatelessWidget {
                 product.done = value;
                 context.read(productsProvider).update(product);
               }),
-          Text(product.id),
-          SizedBox(width: 10.0),
           Text(product.name),
           SizedBox(width: 10.0),
           Text(product.price),
+          SizedBox(width: 10.0),
+          Text((double.parse(product.price) * int.parse(product.amount))
+              .toString()),
           SizedBox(width: 10.0),
           Text(product.amount),
         ],

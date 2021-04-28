@@ -1,4 +1,3 @@
-import 'package:dailylauncher/models/models.dart';
 import 'package:dailylauncher/providers/product_provider.dart';
 import 'package:dailylauncher/widgets/widgets.dart';
 import 'package:flutter/material.dart';
@@ -13,10 +12,52 @@ class ShoppingListScreen extends StatelessWidget {
         padding: EdgeInsets.all(16.0),
         child: Column(
           children: [
+            Consumer(
+              builder: (context, watch, child) {
+                final filter = watch(filterProvider);
+                print(filter.state);
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    RaisedButton(
+                      child: Text('All'),
+                      onPressed: () {
+                        filter.state = Filter.all;
+                      },
+                      color: Filter.all == filter.state
+                          ? Colors.blue
+                          : Colors.grey.shade800,
+                    ),
+                    SizedBox(width: 5.0),
+                    RaisedButton(
+                      child: Text('Done'),
+                      onPressed: () {
+                        filter.state = Filter.done;
+                      },
+                      color: Filter.done == filter.state
+                          ? Colors.blue
+                          : Colors.grey.shade800,
+                    ),
+                    SizedBox(width: 5.0),
+                    RaisedButton(
+                      child: Text('Undone'),
+                      onPressed: () {
+                        filter.state = Filter.undone;
+                      },
+                      color: Filter.undone == filter.state
+                          ? Colors.blue
+                          : Colors.grey.shade800,
+                    )
+                  ],
+                );
+              },
+            ),
             Expanded(
               child: Consumer(
                 builder: (context, watch, child) {
-                  AsyncValue<List> products = watch(productsProvider.state);
+                  AsyncValue<List> products =
+                      watch(filteredProductsProvider).state;
+                  print(products);
                   return products.when(
                     data: (data) {
                       return ListView.builder(
